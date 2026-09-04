@@ -1,0 +1,10 @@
+{
+  "name": "sovereign-industrial-agent-workbench",
+  "version": "0.0.1",
+  "private": true,
+  "description": "On-premise agentic workbench for confidential industrial work, built on dsh as the plugin runtime",
+  "license": "MIT",
+  "dependencies": {
+    "@deepseek-ai/dsh": "0.1.2-rc.1"
+  }
+}

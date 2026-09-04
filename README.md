@@ -36,8 +36,13 @@ Status: Phase 0 scaffolding only. No application code yet.
   To be clear: we did not write dsh. It is the upstream open-source agent
   harness ("everything is a plugin") that hosts tool plugins; we build our
   authorization gate and our industrial tools on top of it. dsh is consumed
-  as a dependency / subprocess plugin host, not forked or ported. See
-  `THIRD_PARTY_NOTICES.md` for the license disclosure.
+  as a dependency / subprocess plugin host, not forked or ported. Pinned
+  version: `@deepseek-ai/dsh` at exactly `0.1.2-rc.1` in `package.json`
+  (no `^`/`~` range). The pin is exact because dsh is a developer preview
+  whose own README warns to expect compatibility-breaking changes between
+  releases — a floating range could silently pull a breaking harness under
+  a qualified workbench. See `THIRD_PARTY_NOTICES.md` for the license
+  disclosure.
 
 ## Project structure
 

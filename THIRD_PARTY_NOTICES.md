@@ -9,6 +9,12 @@ Our own code in this repo is MIT-licensed — see `LICENSE`.
   on. We did not write dsh; we build our authorization layer and tools on
   top of it, using it as the plugin runtime / plugin host.
 - **License:** MIT. dsh's actual license text is reproduced below.
+- **Pinned version:** `@deepseek-ai/dsh` at exactly `0.1.2-rc.1`
+  (`package.json`, no `^`/`~` range). The pin is exact because dsh is a
+  developer preview whose own README warns to expect
+  compatibility-breaking changes between releases — a floating range could
+  silently pull a breaking harness under this workbench, so upgrades are a
+  deliberate, reviewed commit, never an accident of `npm install`.
 - **Vendoring note:** we do not vendor dsh's source directly, so we do not
   duplicate its own third-party notices here — for the full transitive
   dependency disclosures, see dsh's own `THIRD_PARTY_NOTICES.md` upstream
