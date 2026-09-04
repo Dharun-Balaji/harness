@@ -1,21 +1,23 @@
 # Third-Party Notices
 
-This repo's own code is MIT-licensed (see `LICENSE`).
+Our own code in this repo is MIT-licensed — see `LICENSE`.
 
-## dsh — DeepSeek Harness (MIT License)
+## dsh — DeepSeek Harness (MIT)
 
-- **Role in this project:** Node/TypeScript plugin runtime, invoked by the
-  Python orchestrator as an out-of-process subprocess / plugin host. dsh
-  is not ported to Python and is not vendored in this repo as of Phase 0.
-- **License:** MIT. The MIT license requires the copyright + permission
-  notice to travel with the code, which is why it is reproduced here and
-  must be kept when dsh is added as a dependency, submodule, or vendored
-  directory in later phases.
+- **What it is:** the upstream open-source agent harness
+  (https://github.com/deepseek-ai/deepseek-harness) this workbench builds
+  on. We did not write dsh; we build our authorization layer and tools on
+  top of it, using it as the plugin runtime / plugin host.
+- **License:** MIT. dsh's actual license text is reproduced below.
+- **Vendoring note:** we do not vendor dsh's source directly, so we do not
+  duplicate its own third-party notices here — for the full transitive
+  dependency disclosures, see dsh's own `THIRD_PARTY_NOTICES.md` upstream
+  at https://github.com/deepseek-ai/deepseek-harness/blob/master/THIRD_PARTY_NOTICES.md.
 
 ```text
 MIT License
 
-Copyright (c) DeepSeek Harness contributors
+Copyright (c) 2026 DeepSeek
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -35,8 +37,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-
-**Integration note (binding for later phases):** do not copy dsh source
-into this repo without keeping this notice adjacent to it, and record the
-exact dsh version/commit in the README and in any lockfile or submodule
-pointer so runs stay reproducible.

@@ -12,7 +12,6 @@ dist/
 venv/
 ENV/
 env/
-.env
 pip-wheel-metadata/
 .pytest_cache/
 .mypy_cache/
@@ -20,6 +19,11 @@ pip-wheel-metadata/
 .coverage
 coverage.xml
 htmlcov/
+
+# Local SQLite state (dev databases stay out of git)
+*.db
+*.sqlite3
+*.sqlite
 
 # Node / dsh plugin host
 node_modules/
@@ -39,11 +43,35 @@ build/
 out/
 *.tsbuildinfo
 
+# Local model weights — never commit these (multi-GB)
+*.bin
+*.safetensors
+*.gguf
+*.ggml
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.tflite
+*.h5
+*.ot
+models/
+weights/
+checkpoints/
+local-models/
+
 # OS junk
 .DS_Store
 Thumbs.db
 desktop.ini
 *~
+
+# Secrets / local env — never commit
+.env
+.env.*
+*.pem
+*.key
+secrets/
 
 # IDE / editors
 .idea/
@@ -52,27 +80,7 @@ desktop.ini
 *.swp
 *.swo
 
-# Local model weights — never commit these (multi-GB)
-*.bin
-*.safetensors
-*.pt
-*.pth
-*.ckpt
-*.onnx
-*.gguf
-*.ggml
-*.tflite
-*.h5
-*.ot
-models/
-weights/
-checkpoints/
-*.gguf.*
-local-models/
-
 # Runtime / local state
 *.log
-*.sqlite
-*.db
 data/
 tmp/
