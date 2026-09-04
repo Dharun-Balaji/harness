@@ -60,3 +60,26 @@ tests/test_ocr.py::test_unreadable_file_raises PASSED                    [100%]
 ```
 
 Full suite at commit time: 18 passed.
+
+## Phase 3b — sandboxed calculation tool
+
+Built `src/tools/calculate.py`: `run_calculation(reading, rule)` implementing the concrete `pressure_vessel_margin` rule for the Phase 2 seed data (reading `{equipment_id, pressure_bar}` vs demo rated max 10.0 bar standing in for the `sop-pressure-vessel-repair` value). Returns `CalculationResult(rule, equipment_id, passed, margin_bar, reason, error)` — failures carry specific reasons with the numbers (e.g. `pressure 12.5 bar exceeds maximum safe 10.0 bar for PUMP-214 (over by 2.5 bar)`), which is exactly what Phase 4's recovery demo will consume.
+
+Sandboxing, precisely (verified on linux, `os.name == 'posix'` is True here): the rule runs in a separate `sys.executable -c` child over stdin/stdout JSON, never in the caller's interpreter; wall-clock kill via `subprocess.run(timeout=10s)`; `preexec_fn` sets `RLIMIT_CPU=5s` + `RLIMIT_AS=256MiB` on the child; child env is stripped to `PATH` only; the fixed worker snippet imports only `json`/`sys`, so it has no socket or file-write capability by construction. Honest limitation, also stated in the module docstring: this is NOT a net namespace/seccomp/container — full OS-level isolation needs root or a container runtime, unavailable here. Timeout, spawn failure, non-zero exit, and bad worker output all map to structured `error` results; the caller never sees a bare child exception.
+
+Actual pytest output (`.venv/bin/python -m pytest tests/test_calculate.py -v`):
+
+```text
+tests/test_calculate.py::test_pass_with_margin PASSED                    [ 12%]
+tests/test_calculate.py::test_fail_out_of_range_reports_specific_reason PASSED [ 25%]
+tests/test_calculate.py::test_boundary_at_maximum_passes PASSED          [ 37%]
+tests/test_calculate.py::test_malformed_input_returns_structured_error PASSED [ 50%]
+tests/test_calculate.py::test_unknown_rule_returns_structured_error PASSED [ 62%]
+tests/test_calculate.py::test_rejects_bad_argument_types PASSED          [ 75%]
+tests/test_calculate.py::test_hung_child_maps_to_timeout_error PASSED    [ 87%]
+tests/test_calculate.py::test_crashed_child_maps_to_exit_error PASSED    [100%]
+
+8 passed in 0.25s
+```
+
+Pass/fail/malformed/unknown-rule cases spawn a real child each; the timeout and crash cases simulate a hung/dead child via monkeypatched `subprocess.run`/`CompletedProcess` (deterministic — they prove the parent's failure mapping, stated as such in the test docstrings). Full suite at commit time: 26 passed.
