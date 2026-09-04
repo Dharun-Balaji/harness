@@ -1,0 +1,26 @@
+# Workbench tool bridge for dsh (--patch overlay, applied in-memory; edits nothing).
+#
+# Mounts the four Phase 3 tools (exposed by src/dsh_bridge/mcp_server.py over
+# MCP stdio) into dsh as mcp__workbench__ocr_inspection_log,
+# mcp__workbench__check_pressure_margin, mcp__workbench__lookup_sop,
+# mcp__workbench__write_inspection_report (+ mcp__workbench__bridge_info).
+# Paths resolve from the environment when set, else fall back to this
+# machine's repo checkout (local-MVP pragmatism, stated plainly).
+#
+# Usage: dsh --profile headless --patch ./dsh/workbench.patch.yml "task"
+- insert:
+    - id: mcp-workbench
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: workbench
+        transport: stdio
+        command: !!js "process.env.WORKBENCH_PYTHON ?? '/home/dharun/Downloads/web/hrn/.venv/bin/python'"
+        args: ['-m', 'dsh_bridge.mcp_server']
+        cwd: !!js "process.env.WORKBENCH_REPO ?? '/home/dharun/Downloads/web/hrn'"
+        env:
+          PYTHONPATH: !!js "((process.env.WORKBENCH_REPO ?? '/home/dharun/Downloads/web/hrn') + '/src')"
+          WORKBENCH_AUTH_DB: !!js "process.env.WORKBENCH_AUTH_DB ?? '/home/dharun/Downloads/web/hrn/data/auth.db'"
+          WORKBENCH_SOP_DIR: !!js "process.env.WORKBENCH_SOP_DIR ?? '/home/dharun/Downloads/web/hrn/docs/sops'"
+        toolCallTimeoutMs: 120000
+        failOnStartupError: true
+        reconnect: { enabled: true }

@@ -122,3 +122,31 @@ tests/test_report.py::test_report_rejects_bad_input PASSED               [100%]
 ```
 
 The fixture feeds REAL upstream outputs (actual OCR of the committed PNG, an actual sandboxed `run_calculation` child run, actual gated lookups against a seeded demo DB), and every content test reopens the generated file with `Document(path)` and asserts on paragraph text — PUMP-214, 7.2, PASS, 2.8, the SOP citation — never mere existence/size. Full suite at commit time: 37 passed.
+
+## Phase 4 — end-to-end wiring
+
+The four tools run AS dsh plugins through dsh's real agent loop — no bypass. Mechanism, stated exactly: dsh exposes no Python-function tool API, so per the documented `@deepseek-ai/dsh-mcp-client` bridge ("connects to MCP servers and registers their tools on ctx.tools"), `src/dsh_bridge/mcp_server.py` serves the tools over MCP stdio and `dsh/workbench.patch.yml` (an in-memory `--patch` overlay, no global config edited) mounts them as `mcp__workbench__ocr_inspection_log`, `mcp__workbench__check_pressure_margin`, `mcp__workbench__lookup_sop`, `mcp__workbench__write_inspection_report`. The scenario runs via dsh's real headless agent loop (`dsh --profile headless --patch ...`), which reasoned, called the tools in order, recovered from the FAIL via SOP lookup, wrote the report, and replied DONE (exit 0). The model route is the ambient local `colab-qwen` (Qwen3 GGUF) — an early `TRANSPORT: Connection error` turned out to be transient, not a missing-key blocker. Real integration friction hit and fixed: the patch overlay needs `- insert:` wrapping with `config:` nested inside the entry (my first version put it beside `- insert:` and composed an empty entry), and `dsh-mcp-client` requires an explicit `reconnect:` key despite the README's defaults table.
+
+Simplifications vs the original design: (1) the 7.2-bar fixture PASSES, so a second committed fixture `tests/fixtures/inspection-log-overpressure.png` (PUMP-214 at 12.5 bar, same irregular style, OCR-verified) provides the deliberate failure case; (2) the e2e test reads dsh's global `~/.dsh` session store rather than a hermetic DSH_HOME, because relocating DSH_HOME would orphan the ambient model route — noted as a test-isolation limitation; (3) the test run takes ~50s (LLM + OCR + subprocesses).
+
+Real trajectory excerpt from dsh's session log (`session.jsonl.zstd`, tool/call events):
+
+```text
+seq 828 | tool/call | mcp__workbench__ocr_inspection_log      (step 1)
+seq 879 | tool/call | mcp__workbench__check_pressure_margin   (step 2)
+seq 925 | tool/call | mcp__workbench__lookup_sop               (step 3)
+seq 1013 | tool/call | mcp__workbench__write_inspection_report (step 4)
+```
+
+Actual pytest output (bridge + e2e):
+
+```text
+tests/test_mcp_bridge.py::test_lists_all_four_tools[asyncio] PASSED
+tests/test_mcp_bridge.py::test_ocr_and_margin_through_mcp[asyncio] PASSED
+tests/test_mcp_bridge.py::test_gated_lookup_through_mcp[asyncio] PASSED
+3 passed in 11.19s
+tests/test_phase4_end_to_end.py::test_end_to_end_through_dsh PASSED
+1 passed in 48.96s
+```
+
+The e2e test asserts on the dsh-written .docx (PUMP-214, 12.5, FAIL + "exceeds maximum safe 10.0 bar", SOP citation with "isolate the vessel") and on the four tool names appearing in order in dsh's trajectory. Full suite at commit time: 41 passed.
