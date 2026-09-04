@@ -105,3 +105,20 @@ tests/test_lookup.py::test_shipped_docs_end_to_end PASSED                [100%]
 ```
 
 Full suite at commit time: 33 passed.
+
+## Phase 3d — report generation tool
+
+Built `src/tools/report.py`: `generate_report(inspection_data, output_path)` renders a REAL Word document via python-docx (new dependency, also installed in `.venv`) with equipment ID, subject, UTC timestamp, quoted OCR reading with its confidence note (plus an explicit low-confidence human-verification warning), the calculation verdict with margin/reason/error, and an SOP section that is never silently omitted — three explicit states: cited with quoted text when found, "No SOP reference was consulted" when none was requested, and "SOP reference unavailable to this user" when requested but not found (deliberately not distinguishing denied vs missing, preserving Phase 3c indistinguishability into the report). This closes out Phase 3: all four tools (OCR, sandboxed calculation, gated lookup, report) are built and tested independently — end-to-end wiring is Phase 4.
+
+Actual pytest output (`.venv/bin/python -m pytest tests/test_report.py -v`):
+
+```text
+tests/test_report.py::test_report_contains_real_pipeline_values PASSED   [ 25%]
+tests/test_report.py::test_report_states_sop_unavailable_explicitly PASSED [ 50%]
+tests/test_report.py::test_report_states_no_sop_consulted PASSED         [ 75%]
+tests/test_report.py::test_report_rejects_bad_input PASSED               [100%]
+
+4 passed in 12.97s
+```
+
+The fixture feeds REAL upstream outputs (actual OCR of the committed PNG, an actual sandboxed `run_calculation` child run, actual gated lookups against a seeded demo DB), and every content test reopens the generated file with `Document(path)` and asserts on paragraph text — PUMP-214, 7.2, PASS, 2.8, the SOP citation — never mere existence/size. Full suite at commit time: 37 passed.

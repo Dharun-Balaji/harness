@@ -11,6 +11,7 @@ from tools.ocr import (
     extract_log_text,
     extract_log_text_with_confidence,
 )
+from tools.report import generate_report
 
 __all__ = [
     "CalculationResult",
@@ -19,6 +20,7 @@ __all__ = [
     "RULE_PRESSURE_VESSEL_MARGIN",
     "extract_log_text",
     "extract_log_text_with_confidence",
+    "generate_report",
     "lookup_document",
     "run_calculation",
 ]
