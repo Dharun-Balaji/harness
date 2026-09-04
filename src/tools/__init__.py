@@ -5,6 +5,7 @@ from tools.calculate import (
     CalculationResult,
     run_calculation,
 )
+from tools.lookup import DocumentResult, lookup_document
 from tools.ocr import (
     OcrResult,
     extract_log_text,
@@ -13,9 +14,11 @@ from tools.ocr import (
 
 __all__ = [
     "CalculationResult",
+    "DocumentResult",
     "OcrResult",
     "RULE_PRESSURE_VESSEL_MARGIN",
     "extract_log_text",
     "extract_log_text_with_confidence",
+    "lookup_document",
     "run_calculation",
 ]

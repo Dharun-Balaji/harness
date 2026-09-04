@@ -1,0 +1,12 @@
+SOP-032 — Pressure Vessel Repair (RESTRICTED)
+Revision 11 — clearance: senior inspectors only. Do not copy off site.
+
+1. No repair begins without a signed repair plan referencing the vessel
+   nameplate (e.g. PUMP-214) and its rated maximum of 10.0 bar.
+2. Operating pressure must remain at or below 10.0 bar at all times. Any
+   reading above 10.0 bar is an automatic stop-work: isolate the vessel,
+   vent to zero, and escalate to the senior inspector on duty.
+3. After repair, hold at 10.0 bar for 30 minutes with no visible weep
+   before sign-off. Log pressure, date, and inspector initials.
+4. This document must never enter a retrieval context the reader is not
+   cleared for — the lookup tool enforces that, not the reader's memory.

@@ -83,3 +83,25 @@ tests/test_calculate.py::test_crashed_child_maps_to_exit_error PASSED    [100%]
 ```
 
 Pass/fail/malformed/unknown-rule cases spawn a real child each; the timeout and crash cases simulate a hung/dead child via monkeypatched `subprocess.run`/`CompletedProcess` (deterministic — they prove the parent's failure mapping, stated as such in the test docstrings). Full suite at commit time: 26 passed.
+
+## Phase 3c — document lookup tool
+
+Built `src/tools/lookup.py`: `lookup_document(subject, resource_id, context) -> DocumentResult` serving the three seeded SOPs as short realistic text files under `docs/sops/` (the restricted one states the 10.0 bar rated max, matching the Phase 3b threshold). The gate is structural, not check-then-read: `authorize()` runs first with an early return, and the only `open()` in the module sits textually below it on the ALLOW path. Existence-leak decision: denial is INDISTINGUISHABLE from missing — both yield `DocumentResult(found=False, text=None)` with no `authorized` flag, so probing IDs cannot enumerate restricted SOPs (auditors query the policy DB directly instead). Bonus hardening: `resource_id` must match `[A-Za-z0-9][A-Za-z0-9_-]*` or it is rejected before any path is built.
+
+How the no-read claim was proved (empirical, not just code reading): tests spy on `builtins.open` with `wraps=open` — the denied path asserts `spy.call_count == 0` while a positive-control test asserts exactly 1 call on the allowed path, proving the spy was positioned to observe reads (sqlite3 goes through C, unaffected by the patch). Indistinguishability is asserted by comparing denied vs nonexistent results field-for-field.
+
+Actual pytest output (`.venv/bin/python -m pytest tests/test_lookup.py -v`):
+
+```text
+tests/test_lookup.py::test_authorized_returns_exact_content PASSED       [ 14%]
+tests/test_lookup.py::test_denied_indistinguishable_from_missing PASSED  [ 28%]
+tests/test_lookup.py::test_unauthorized_never_opens_file PASSED          [ 42%]
+tests/test_lookup.py::test_authorized_opens_file_exactly_once PASSED     [ 57%]
+tests/test_lookup.py::test_unknown_subject_gets_not_found PASSED         [ 71%]
+tests/test_lookup.py::test_path_traversal_treated_as_not_found PASSED    [ 85%]
+tests/test_lookup.py::test_shipped_docs_end_to_end PASSED                [100%]
+
+7 passed in 0.12s
+```
+
+Full suite at commit time: 33 passed.

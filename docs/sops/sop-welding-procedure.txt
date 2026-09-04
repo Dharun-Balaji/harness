@@ -1,0 +1,11 @@
+SOP-014 — Welding Procedure, Carbon Steel (GMAW)
+Revision 7 — clearance: shop floor and up.
+
+1. Verify the work order and the base-metal marking before striking an
+   arc. Do not weld on unmarked or quarantined stock.
+2. Shielding gas: 75/25 Ar/CO2 at 20-25 CFH. Check the regulator for
+   creep before each shift.
+3. Interpass temperature must stay under 250 C. Log the reading on the
+   inspection sheet for every third pass.
+4. Grind all starts and stops. A weld nobody inspected is a weld nobody
+   trusts — call the inspector before the piece leaves the bay.
