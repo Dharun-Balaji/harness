@@ -8,6 +8,10 @@ version = "0.0.1"
 description = "Local-first workbench for building and running industrial agents (Python orchestrator + dsh plugin host)"
 readme = "README.md"
 requires-python = ">=3.10"
+dependencies = [
+  "pytesseract>=0.3.10",
+  "pillow>=10.0",
+]
 license = { text = "MIT" }
 authors = [{ name = "Dharun Balaji" }]
 keywords = ["agents", "industrial", "orchestration"]

@@ -28,3 +28,35 @@ tests/test_authorize.py::test_rejects_bad_argument_types PASSED          [100%]
 ```
 
 Seeded-demo spot check also passed: junior sees exactly `['sop-shop-safety', 'sop-welding-procedure']` (restricted SOP absent), senior sees all three, junior→restricted is `False`, senior→restricted is `True`.
+
+## Phase 3a — OCR tool
+
+Built `src/tools/ocr.py` around the real stack: system `tesseract 5.5.3` (preinstalled, verified with `tesseract --version`) plus `pytesseract` + `pillow` installed into the project `.venv` and recorded in `pyproject.toml`. `extract_log_text(image_path) -> str` returns raw OCR text (grayscale + 2x upscale preprocessing); `extract_log_text_with_confidence()` additionally returns mean word-confidence and an explicit `low_confidence` flag (mean < 40, empty text, or no words), so Phase 4 can retry/escalate instead of reasoning over misread numbers. Missing files raise `FileNotFoundError`, unreadable files raise `ValueError`, a missing binary raises `RuntimeError` with the install command. Fixture is a real committed PNG (`tests/fixtures/inspection-log.png`, 1200x850): no handwriting font existed on the system, so the log (PUMP-214, 7.2 bar, 2026-09-03, DB) was rendered in Liberation Sans with irregular sizing, ±1.6° rotation, margin/spacing jitter, and paper noise.
+
+Actual raw OCR output on the fixture (mean confidence 89.9, low_confidence=False):
+
+```text
+INSPECTION LOG
+
+Equipment: PUMP-214
+
+Pressure: 7.2 bar
+Date: 2026-09-03
+
+Inspector: DB
+```
+
+Actual pytest output (`.venv/bin/python -m pytest tests/test_ocr.py -v`):
+
+```text
+tests/test_ocr.py::test_fixture_exists PASSED                            [ 16%]
+tests/test_ocr.py::test_extract_log_text_recovers_key_readings PASSED    [ 33%]
+tests/test_ocr.py::test_structured_result_reports_high_confidence_on_fixture PASSED [ 50%]
+tests/test_ocr.py::test_blank_image_flags_low_confidence PASSED          [ 66%]
+tests/test_ocr.py::test_missing_file_raises PASSED                       [ 83%]
+tests/test_ocr.py::test_unreadable_file_raises PASSED                    [100%]
+
+6 passed in 9.19s
+```
+
+Full suite at commit time: 18 passed.
